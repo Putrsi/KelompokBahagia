@@ -70,8 +70,8 @@ switch ($resource) {
         }
         break;
 
-    default:
-        echo json_encode(["success" => false, "message" => "Endpoint tidak ditemukan."]);
+        default:
+        echo "Endpoint tidak ditemukan.";
         break;
 }
 ?>

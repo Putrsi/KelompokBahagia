@@ -1,0 +1,77 @@
+<?php
+class LaguController {
+    private $db;
+    private $lagu;
+
+    public function __construct($db) {
+        $this->db = $db;
+        $this->lagu = new Lagu($db);
+    }
+
+    // GET → tampilin semua lagu
+    public function index() {
+        $data = $this->lagu->bacaSemua();
+        echo json_encode([
+            "success" => true,
+            "data" => $data
+        ]);
+    }
+
+    // POST → tambah lagu baru
+    public function tambah($input) {
+        $judul = trim($input['judul'] ?? '');
+        $url = trim($input['link'] ?? '');
+
+        if ($judul === '' || $url === '') {
+            echo json_encode(["success" => false, "message" => "Judul dan link wajib diisi."]);
+            return;
+        }
+
+        $sumber = $this->cekJenisLink($url);
+        if (!$sumber) {
+            echo json_encode(["success" => false, "message" => "Link tidak dikenali. Pakai link YouTube atau link audio (.mp3)."]);
+            return;
+        }
+
+        $this->lagu->judul = $judul;
+        $this->lagu->link = $url;
+        $this->lagu->jenis = $sumber['jenis'];
+        $this->lagu->youtube_id = $sumber['youtube_id'];
+
+        if ($this->lagu->tambah()) {
+            echo json_encode(["success" => true, "message" => "Lagu ditambahkan.", "id" => $this->lagu->id]);
+        } else {
+            echo json_encode(["success" => false, "message" => "Gagal menambahkan lagu."]);
+        }
+    }
+
+    // DELETE → hapus lagu
+    public function hapus($id) {
+        $this->lagu->id = $id;
+        if ($this->lagu->hapus()) {
+            echo json_encode(["success" => true, "message" => "Lagu dihapus."]);
+        } else {
+            echo json_encode(["success" => false, "message" => "Gagal menghapus lagu."]);
+        }
+    }
+
+    // cek link YouTube atau file audio
+    private function cekJenisLink($url) {
+        $pola = [
+            '/youtu\.be\/([A-Za-z0-9_-]{11})/',
+            '/youtube\.com\/watch\?v=([A-Za-z0-9_-]{11})/',
+            '/youtube\.com\/embed\/([A-Za-z0-9_-]{11})/',
+            '/youtube\.com\/shorts\/([A-Za-z0-9_-]{11})/',
+        ];
+        foreach ($pola as $p) {
+            if (preg_match($p, $url, $match)) {
+                return ["jenis" => "youtube", "youtube_id" => $match[1]];
+            }
+        }
+        if (preg_match('/\.(mp3|wav|ogg|m4a)(\?.*)?$/i', $url)) {
+            return ["jenis" => "audio", "youtube_id" => null];
+        }
+        return null;
+    }
+}
+?>
