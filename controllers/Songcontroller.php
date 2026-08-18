@@ -40,7 +40,6 @@ class SongController {
             return;
         }
 
-        // genre_id opsional, tapi kalau diisi harus angka valid
         if ($genre_id !== null && $genre_id !== '' && !ctype_digit((string)$genre_id)) {
             echo json_encode(["success" => false, "message" => "Genre tidak valid."]);
             return;

@@ -8,7 +8,6 @@ class PlaylistController {
         $this->playlist = new Playlist($db);
     }
 
-    // liat semua playlist milik user yang login
     public function index() {
         session_start();
         if (!isset($_SESSION['user_id'])) {
@@ -20,13 +19,11 @@ class PlaylistController {
         echo json_encode(["success" => true, "data" => $data]);
     }
 
-    // liat playlist publik (buat explore / dilihat orang lain)
     public function publik() {
         $data = $this->playlist->bacaPublic();
         echo json_encode(["success" => true, "data" => $data]);
     }
 
-    // liat detail 1 playlist + isi lagunya
     public function detail($id) {
         $data = $this->playlist->cariById($id);
 
@@ -35,7 +32,6 @@ class PlaylistController {
             return;
         }
 
-        // kalau playlist private, cuma pemiliknya yang boleh liat
         if (!$data['is_public']) {
             session_start();
             if (!isset($_SESSION['user_id']) || $_SESSION['user_id'] != $data['user_id']) {
@@ -48,7 +44,6 @@ class PlaylistController {
         echo json_encode(["success" => true, "data" => $data]);
     }
 
-    // bikin playlist baru
     public function tambah($input) {
         session_start();
         if (!isset($_SESSION['user_id'])) {
@@ -77,7 +72,6 @@ class PlaylistController {
         }
     }
 
-    // hapus playlist
     public function hapus($id) {
         session_start();
         if (!isset($_SESSION['user_id'])) {
@@ -92,7 +86,6 @@ class PlaylistController {
         }
     }
 
-    // tambah lagu ke playlist
     public function tambahLagu($input) {
         session_start();
         if (!isset($_SESSION['user_id'])) {
@@ -108,7 +101,6 @@ class PlaylistController {
             return;
         }
 
-        // cek dulu playlist ini emang punya user yang login
         $data = $this->playlist->cariById($playlist_id);
         if (!$data || $data['user_id'] != $_SESSION['user_id']) {
             echo json_encode(["success" => false, "message" => "Playlist tidak ditemukan / bukan milikmu."]);
@@ -126,7 +118,6 @@ class PlaylistController {
         }
     }
 
-    // hapus lagu dari playlist
     public function hapusLagu($input) {
         session_start();
         if (!isset($_SESSION['user_id'])) {
